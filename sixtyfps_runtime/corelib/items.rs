@@ -28,7 +28,7 @@ When adding an item or a property, it needs to be kept in sync with different pl
 
 use crate::component::ComponentVTable;
 use crate::graphics::PathDataIterator;
-use crate::graphics::{Brush, Color, Length, PathData, Point, Rect, Size};
+use crate::graphics::{Brush, Color, PathData, Rect, Size};
 use crate::input::{
     FocusEvent, InputEventFilterResult, InputEventResult, KeyEvent, KeyEventResult, KeyEventType,
     MouseEvent, MouseEventType,
@@ -43,17 +43,6 @@ use const_field_offset::FieldOffsets;
 use core::pin::Pin;
 use sixtyfps_corelib_macros::*;
 use vtable::*;
-
-macro_rules! fn_geometry {
-    () => {
-        fn geometry(self: Pin<&Self>) -> Rect {
-            Rect::new(
-                Point::from_lengths(self.x(), self.y()),
-                Size::from_lengths(self.width(), self.height()),
-            )
-        }
-    };
-}
 
 mod text;
 pub use text::*;
@@ -191,17 +180,19 @@ impl ItemWeak {
 /// The implementation of the `Rectangle` element
 pub struct Rectangle {
     pub background: Property<Brush>,
-    pub x: Property<Length>,
-    pub y: Property<Length>,
-    pub width: Property<Length>,
-    pub height: Property<Length>,
+    pub x: Property<f32>,
+    pub y: Property<f32>,
+    pub width: Property<f32>,
+    pub height: Property<f32>,
     pub cached_rendering_data: CachedRenderingData,
 }
 
 impl Item for Rectangle {
     fn init(self: Pin<&Self>, _window: &ComponentWindow) {}
 
-    fn_geometry!();
+    fn geometry(self: Pin<&Self>) -> Rect {
+        euclid::rect(self.x(), self.y(), self.width(), self.height())
+    }
 
     fn layouting_info(self: Pin<&Self>, _window: &ComponentWindow) -> LayoutInfo {
         LayoutInfo { horizontal_stretch: 1., vertical_stretch: 1., ..LayoutInfo::default() }
@@ -259,12 +250,12 @@ ItemVTable_static! {
 /// The implementation of the `BorderRectangle` element
 pub struct BorderRectangle {
     pub background: Property<Brush>,
-    pub x: Property<Length>,
-    pub y: Property<Length>,
-    pub width: Property<Length>,
-    pub height: Property<Length>,
-    pub border_width: Property<Length>,
-    pub border_radius: Property<Length>,
+    pub x: Property<f32>,
+    pub y: Property<f32>,
+    pub width: Property<f32>,
+    pub height: Property<f32>,
+    pub border_width: Property<f32>,
+    pub border_radius: Property<f32>,
     pub border_color: Property<Brush>,
     pub cached_rendering_data: CachedRenderingData,
 }
@@ -273,10 +264,7 @@ impl Item for BorderRectangle {
     fn init(self: Pin<&Self>, _window: &ComponentWindow) {}
 
     fn geometry(self: Pin<&Self>) -> Rect {
-        Rect::new(
-            Point::from_lengths(self.x(), self.y()),
-            Size::from_lengths(self.width(), self.height()),
-        )
+        euclid::rect(self.x(), self.y(), self.width(), self.height())
     }
 
     fn layouting_info(self: Pin<&Self>, _window: &ComponentWindow) -> LayoutInfo {
@@ -346,10 +334,10 @@ ItemVTable_static! {
 #[derive(FieldOffsets, Default, SixtyFPSElement)]
 #[pin]
 pub struct TouchArea {
-    pub x: Property<Length>,
-    pub y: Property<Length>,
-    pub width: Property<Length>,
-    pub height: Property<Length>,
+    pub x: Property<f32>,
+    pub y: Property<f32>,
+    pub width: Property<f32>,
+    pub height: Property<f32>,
     pub enabled: Property<bool>,
     /// FIXME: We should anotate this as an "output" property.
     pub pressed: Property<bool>,
@@ -357,11 +345,11 @@ pub struct TouchArea {
     /// FIXME: there should be just one property for the point istead of two.
     /// Could even be merged with pressed in a Property<Option<Point>> (of course, in the
     /// implementation item only, for the compiler it would stay separate properties)
-    pub pressed_x: Property<Length>,
-    pub pressed_y: Property<Length>,
+    pub pressed_x: Property<f32>,
+    pub pressed_y: Property<f32>,
     /// FIXME: should maybe be as parameter to the mouse event instead. Or at least just one property
-    pub mouse_x: Property<Length>,
-    pub mouse_y: Property<Length>,
+    pub mouse_x: Property<f32>,
+    pub mouse_y: Property<f32>,
     pub clicked: Callback<VoidArg>,
     /// FIXME: remove this
     pub cached_rendering_data: CachedRenderingData,
@@ -371,10 +359,7 @@ impl Item for TouchArea {
     fn init(self: Pin<&Self>, _window: &ComponentWindow) {}
 
     fn geometry(self: Pin<&Self>) -> Rect {
-        Rect::new(
-            Point::from_lengths(self.x(), self.y()),
-            Size::from_lengths(self.width(), self.height()),
-        )
+        euclid::rect(self.x(), self.y(), self.width(), self.height())
     }
 
     fn layouting_info(self: Pin<&Self>, _window: &ComponentWindow) -> LayoutInfo {
@@ -479,10 +464,10 @@ impl Default for EventResult {
 #[derive(FieldOffsets, Default, SixtyFPSElement)]
 #[pin]
 pub struct FocusScope {
-    pub x: Property<Length>,
-    pub y: Property<Length>,
-    pub width: Property<Length>,
-    pub height: Property<Length>,
+    pub x: Property<f32>,
+    pub y: Property<f32>,
+    pub width: Property<f32>,
+    pub height: Property<f32>,
     pub has_focus: Property<bool>,
     pub key_pressed: Callback<KeyEventArg, EventResult>,
     pub key_released: Callback<KeyEventArg, EventResult>,
@@ -493,7 +478,9 @@ pub struct FocusScope {
 impl Item for FocusScope {
     fn init(self: Pin<&Self>, _window: &ComponentWindow) {}
 
-    fn_geometry!();
+    fn geometry(self: Pin<&Self>) -> Rect {
+        euclid::rect(self.x(), self.y(), self.width(), self.height())
+    }
 
     fn layouting_info(self: Pin<&Self>, _window: &ComponentWindow) -> LayoutInfo {
         LayoutInfo::default()
@@ -576,19 +563,21 @@ ItemVTable_static! {
 #[pin]
 /// The implementation of the `Clip` element
 pub struct Clip {
-    pub x: Property<Length>,
-    pub y: Property<Length>,
-    pub width: Property<Length>,
-    pub height: Property<Length>,
-    pub border_radius: Property<Length>,
-    pub border_width: Property<Length>,
+    pub x: Property<f32>,
+    pub y: Property<f32>,
+    pub width: Property<f32>,
+    pub height: Property<f32>,
+    pub border_radius: Property<f32>,
+    pub border_width: Property<f32>,
     pub cached_rendering_data: CachedRenderingData,
 }
 
 impl Item for Clip {
     fn init(self: Pin<&Self>, _window: &ComponentWindow) {}
 
-    fn_geometry!();
+    fn geometry(self: Pin<&Self>) -> Rect {
+        euclid::rect(self.x(), self.y(), self.width(), self.height())
+    }
 
     fn layouting_info(self: Pin<&Self>, _window: &ComponentWindow) -> LayoutInfo {
         LayoutInfo { horizontal_stretch: 1., vertical_stretch: 1., ..LayoutInfo::default() }
@@ -649,10 +638,10 @@ ItemVTable_static! {
 /// The Opacity Item is not meant to be used directly by the .60 code, instead, the `opacity: xxx` or `visible: false` should be used
 pub struct Opacity {
     // FIXME: this element shouldn't need these geometry property
-    pub x: Property<Length>,
-    pub y: Property<Length>,
-    pub width: Property<Length>,
-    pub height: Property<Length>,
+    pub x: Property<f32>,
+    pub y: Property<f32>,
+    pub width: Property<f32>,
+    pub height: Property<f32>,
     pub opacity: Property<f32>,
     pub cached_rendering_data: CachedRenderingData,
 }
@@ -660,7 +649,9 @@ pub struct Opacity {
 impl Item for Opacity {
     fn init(self: Pin<&Self>, _window: &ComponentWindow) {}
 
-    fn_geometry!();
+    fn geometry(self: Pin<&Self>) -> Rect {
+        euclid::rect(self.x(), self.y(), self.width(), self.height())
+    }
 
     fn layouting_info(self: Pin<&Self>, _window: &ComponentWindow) -> LayoutInfo {
         LayoutInfo { horizontal_stretch: 1., vertical_stretch: 1., ..LayoutInfo::default() }
@@ -718,10 +709,10 @@ ItemVTable_static! {
 /// The implementation of the `Rotate` element
 pub struct Rotate {
     pub angle: Property<f32>,
-    pub origin_x: Property<Length>,
-    pub origin_y: Property<Length>,
-    pub width: Property<Length>,
-    pub height: Property<Length>,
+    pub origin_x: Property<f32>,
+    pub origin_y: Property<f32>,
+    pub width: Property<f32>,
+    pub height: Property<f32>,
     pub cached_rendering_data: CachedRenderingData,
 }
 
@@ -803,15 +794,15 @@ impl Default for FillRule {
 #[derive(FieldOffsets, Default, SixtyFPSElement)]
 #[pin]
 pub struct Path {
-    pub x: Property<Length>,
-    pub y: Property<Length>,
-    pub width: Property<Length>,
-    pub height: Property<Length>,
+    pub x: Property<f32>,
+    pub y: Property<f32>,
+    pub width: Property<f32>,
+    pub height: Property<f32>,
     pub elements: Property<PathData>,
     pub fill: Property<Brush>,
     pub fill_rule: Property<FillRule>,
     pub stroke: Property<Brush>,
-    pub stroke_width: Property<Length>,
+    pub stroke_width: Property<f32>,
     pub cached_rendering_data: CachedRenderingData,
 }
 
@@ -891,10 +882,10 @@ ItemVTable_static! {
 #[derive(FieldOffsets, Default, SixtyFPSElement)]
 #[pin]
 pub struct Flickable {
-    pub x: Property<Length>,
-    pub y: Property<Length>,
-    pub width: Property<Length>,
-    pub height: Property<Length>,
+    pub x: Property<f32>,
+    pub y: Property<f32>,
+    pub width: Property<f32>,
+    pub height: Property<f32>,
     pub viewport: Rectangle,
     pub interactive: Property<bool>,
     data: FlickableDataBox,
@@ -906,7 +897,9 @@ pub struct Flickable {
 impl Item for Flickable {
     fn init(self: Pin<&Self>, _window: &ComponentWindow) {}
 
-    fn_geometry!();
+    fn geometry(self: Pin<&Self>) -> Rect {
+        euclid::rect(self.x(), self.y(), self.width(), self.height())
+    }
 
     fn layouting_info(self: Pin<&Self>, _window: &ComponentWindow) -> LayoutInfo {
         LayoutInfo { horizontal_stretch: 1., vertical_stretch: 1., ..LayoutInfo::default() }
@@ -1017,12 +1010,12 @@ pub struct PropertyAnimation {
 #[derive(FieldOffsets, Default, SixtyFPSElement)]
 #[pin]
 pub struct Window {
-    pub width: Property<Length>,
-    pub height: Property<Length>,
+    pub width: Property<f32>,
+    pub height: Property<f32>,
     pub background: Property<Color>,
     pub title: Property<SharedString>,
     pub default_font_family: Property<SharedString>,
-    pub default_font_size: Property<Length>,
+    pub default_font_size: Property<f32>,
     pub default_font_weight: Property<i32>,
     pub cached_rendering_data: CachedRenderingData,
 }
@@ -1119,23 +1112,25 @@ ItemVTable_static! {
 #[pin]
 pub struct BoxShadow {
     // Rectangle properties
-    pub x: Property<Length>,
-    pub y: Property<Length>,
-    pub width: Property<Length>,
-    pub height: Property<Length>,
-    pub border_radius: Property<Length>,
+    pub x: Property<f32>,
+    pub y: Property<f32>,
+    pub width: Property<f32>,
+    pub height: Property<f32>,
+    pub border_radius: Property<f32>,
     // Shadow specific properties
-    pub offset_x: Property<Length>,
-    pub offset_y: Property<Length>,
+    pub offset_x: Property<f32>,
+    pub offset_y: Property<f32>,
     pub color: Property<Color>,
-    pub blur: Property<Length>,
+    pub blur: Property<f32>,
     pub cached_rendering_data: CachedRenderingData,
 }
 
 impl Item for BoxShadow {
     fn init(self: Pin<&Self>, _window: &ComponentWindow) {}
 
-    fn_geometry!();
+    fn geometry(self: Pin<&Self>) -> Rect {
+        euclid::rect(self.x(), self.y(), self.width(), self.height())
+    }
 
     fn layouting_info(self: Pin<&Self>, _window: &ComponentWindow) -> LayoutInfo {
         LayoutInfo { horizontal_stretch: 1., vertical_stretch: 1., ..LayoutInfo::default() }
