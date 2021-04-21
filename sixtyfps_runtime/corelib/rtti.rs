@@ -31,6 +31,7 @@ declare_ValueType![
     i64,
     f32,
     f64,
+    crate::graphics::Length,
     crate::SharedString,
     crate::ImageReference,
     crate::Color,

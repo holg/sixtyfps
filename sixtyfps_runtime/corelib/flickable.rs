@@ -51,7 +51,7 @@ impl FlickableData {
             MouseEventType::MousePressed => {
                 inner.pressed_pos = event.pos;
                 inner.pressed_time = Some(crate::animations::current_tick());
-                inner.pressed_viewport_pos = Point::new(
+                inner.pressed_viewport_pos = Point::from_lengths(
                     (Flickable::FIELD_OFFSETS.viewport + Rectangle::FIELD_OFFSETS.x)
                         .apply_pin(flick)
                         .get(),
@@ -163,7 +163,7 @@ fn ensure_in_bound(flick: Pin<&Flickable>, p: Point) -> Point {
         .apply_pin(flick)
         .get();
 
-    let min = Point::new(w - vw, h - vh);
-    let max = Point::new(0., 0.);
+    let min = Point::from_lengths(w - vw, h - vh);
+    let max = Point::from_lengths(0., 0.);
     p.max(min).min(max)
 }

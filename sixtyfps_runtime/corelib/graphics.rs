@@ -36,6 +36,9 @@ pub type Size = euclid::Size2D<f32, LogicalPixel>;
 /// 2D Transform
 pub type Transform = euclid::Transform2D<f32, LogicalPixel, LogicalPixel>;
 
+/// The type used to represent the coordinates
+pub type Length = euclid::Length<f32, LogicalPixel>;
+
 pub(crate) mod color;
 pub use color::*;
 
