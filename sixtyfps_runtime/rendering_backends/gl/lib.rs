@@ -889,7 +889,6 @@ impl ItemRenderer for GLItemRenderer {
     }
 
     fn draw_path(&mut self, path: std::pin::Pin<&sixtyfps_corelib::items::Path>) {
-        use lyon_path::math::Point;
         let elements = path.elements();
         if matches!(elements, sixtyfps_corelib::PathData::None) {
             return;

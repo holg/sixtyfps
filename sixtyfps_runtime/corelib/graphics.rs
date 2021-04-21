@@ -22,19 +22,16 @@ use crate::rtti::*;
 use crate::SharedString;
 use auto_enums::auto_enum;
 
-/// Unit struct used to qualify the `euclid` type. It means they are a value in logical pixel
-pub struct LogicalPixel;
-
 /// 2D Rectangle
-pub type Rect = euclid::Rect<f32, LogicalPixel>;
+pub type Rect = euclid::default::Rect<f32>;
 /// 2D Rectangle with integer coordinates
-pub type IntRect = euclid::Rect<i32, LogicalPixel>;
+pub type IntRect = euclid::default::Rect<i32>;
 /// 2D Point
-pub type Point = euclid::Point2D<f32, LogicalPixel>;
+pub type Point = euclid::default::Point2D<f32>;
 /// 2D Size
-pub type Size = euclid::Size2D<f32, LogicalPixel>;
+pub type Size = euclid::default::Size2D<f32>;
 /// 2D Transform
-pub type Transform = euclid::Transform2D<f32, LogicalPixel, LogicalPixel>;
+pub type Transform = euclid::default::Transform2D<f32>;
 
 pub(crate) mod color;
 pub use color::*;
