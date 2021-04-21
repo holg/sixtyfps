@@ -162,9 +162,9 @@ pub enum PathEvent {
 
 struct ToLyonPathEventIterator<'a> {
     events_it: std::slice::Iter<'a, PathEvent>,
-    coordinates_it: std::slice::Iter<'a, Point>,
-    first: Option<&'a Point>,
-    last: Option<&'a Point>,
+    coordinates_it: std::slice::Iter<'a, lyon_path::math::Point>,
+    first: Option<&'a lyon_path::math::Point>,
+    last: Option<&'a lyon_path::math::Point>,
 }
 
 impl<'a> Iterator for ToLyonPathEventIterator<'a> {
@@ -245,7 +245,7 @@ pub struct PathDataIterator {
 
 enum LyonPathIteratorVariant {
     FromPath(lyon_path::Path),
-    FromEvents(crate::SharedVector<PathEvent>, crate::SharedVector<Point>),
+    FromEvents(crate::SharedVector<PathEvent>, crate::SharedVector<lyon_path::math::Point>),
 }
 
 impl PathDataIterator {
@@ -274,6 +274,7 @@ impl PathDataIterator {
     }
 
     fn fit(&mut self, width: f32, height: f32) {
+        use lyon_algorithms::math::{Rect, Size};
         if width > 0. || height > 0. {
             let br = lyon_algorithms::aabb::bounding_rect(self.iter());
             self.transform = lyon_algorithms::fit::fit_rectangle(
@@ -296,7 +297,7 @@ pub enum PathData {
     Elements(crate::SharedVector<PathElement>),
     /// The Events variant describes the path as a series of low-level events and
     /// associated coordinates.
-    Events(crate::SharedVector<PathEvent>, crate::SharedVector<Point>),
+    Events(crate::SharedVector<PathEvent>, crate::SharedVector<lyon_path::math::Point>),
 }
 
 impl Default for PathData {

@@ -437,6 +437,7 @@ impl ItemRenderer for QtItemRenderer<'_> {
     }
 
     fn draw_path(&mut self, path: Pin<&items::Path>) {
+        use lyon_path::math::Point;
         let elements = path.elements();
         if matches!(elements, PathData::None) {
             return;

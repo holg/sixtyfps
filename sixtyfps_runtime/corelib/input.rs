@@ -17,7 +17,7 @@ use crate::items::{ItemRc, ItemRef, ItemWeak};
 use crate::Property;
 use crate::{component::ComponentRc, SharedString};
 use const_field_offset::FieldOffsets;
-use euclid::default::Vector2D;
+use euclid::Vector2D;
 use std::pin::Pin;
 use std::rc::Rc;
 
@@ -318,7 +318,7 @@ pub fn process_mouse_input(
     }
 
     let mut result = MouseInputState::default();
-    type State = (Vector2D<f32>, Vec<ItemWeak>);
+    type State = (Vector2D<f32, crate::graphics::LogicalPixel>, Vec<ItemWeak>);
     crate::item_tree::visit_items_with_post_visit(
         &component,
         crate::item_tree::TraversalOrder::FrontToBack,
